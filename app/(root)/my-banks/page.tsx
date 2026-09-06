@@ -4,6 +4,8 @@ import { getAccounts } from '@/lib/actions/bank.actions';
 import React from 'react'
 import BankCard from '@/components/BankCard';
 
+export const dynamic = 'force-dynamic';
+
 const MyBanks = async () => {
   const loggedIn = await getLoggedInUser();
   const accounts = await getAccounts({

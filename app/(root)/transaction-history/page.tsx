@@ -6,6 +6,8 @@ import { formatAmount } from '@/lib/utils';
 import TransactionsTable from '@/components/TransactionsTable';
 import { Pagination } from '@/components/Pagination';
 
+export const dynamic = 'force-dynamic';
+
 const TransactionHistory = async ({ searchParams }: SearchParamProps) => {
 const { id, page } = await searchParams;
 const currentPage = Number(page as string ) || 1;
