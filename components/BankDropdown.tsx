@@ -21,7 +21,7 @@ export const BankDropdown = ({
 }: BankDropdownProps) => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [selected, setSeclected] = useState(accounts[0]);
+  const [selected, setSeclected] = useState(accounts[0] || null);
 
   const handleBankChange = (id: string) => {
     const account = accounts.find((account) => account.appwriteItemId === id)!;
@@ -39,9 +39,17 @@ export const BankDropdown = ({
     }
   };
 
+  if (!selected || accounts.length === 0) {
+    return (
+      <div className="flex w-full bg-white gap-3 md:w-[300px] p-3 border rounded">
+        <p className="text-gray-500">No bank accounts available</p>
+      </div>
+    );
+  }
+
   return (
     <Select
-      defaultValue={selected.id}
+      defaultValue={selected?.id}
       onValueChange={(value) => value && handleBankChange(value)}
     >
       <SelectTrigger
@@ -53,7 +61,7 @@ export const BankDropdown = ({
           height={20}
           alt="account"
         />
-        <p className="line-clamp-1 w-full text-left">{selected.name}</p>
+        <p className="line-clamp-1 w-full text-left">{selected?.name}</p>
       </SelectTrigger>
       <SelectContent
         className={`w-full bg-white md:w-[300px] ${otherStyles}`}

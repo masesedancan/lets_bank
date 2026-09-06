@@ -6,7 +6,7 @@ import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-import { email, z } from "zod";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -20,11 +20,10 @@ import { useRouter } from 'next/navigation';
 import { signUp, signIn } from "@/lib/actions/user.actions";
  import PlaidLink from "./PlaidLink";
 
-
-
 const AuthForm =  ({ type }: { type: "sign-in" | "sign-up" }) => {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -61,13 +60,17 @@ const AuthForm =  ({ type }: { type: "sign-in" | "sign-up" }) => {
       //  Sign up with Supabase & create Dwolla customer
 
       if(type === 'sign-up'){
-        const newUser = await signUp(data as SignUpParams);
+        const result = await signUp(data as SignUpParams);
 
-        if (!newUser) {
+        if (result.needsEmailConfirmation) {
+          // Show email confirmation message
+          setError(null);
+          setNeedsConfirmation(true);
+        } else if (result.user) {
+          setUser(result.user);
+        } else {
           throw new Error('Sign up failed. Please try again.');
         }
-
-        setUser(newUser);
 
       }
 
@@ -118,7 +121,9 @@ const AuthForm =  ({ type }: { type: "sign-in" | "sign-up" }) => {
           <div>
 
             <h2 className="text-3xl font-semibold">
-              {user
+              {needsConfirmation
+                ? "Check Your Email"
+                : user
                 ? "Link Account"
                 : type === "sign-in"
                 ? "Sign In"
@@ -126,7 +131,9 @@ const AuthForm =  ({ type }: { type: "sign-in" | "sign-up" }) => {
             </h2>
 
             <p className="text-gray-600 mt-2">
-              {user
+              {needsConfirmation
+                ? "We've sent you a confirmation email. Please check your inbox and click the link to verify your account before signing in."
+                : user
                 ? "Link your account to get started"
                 : "Please enter your details"}
             </p>
@@ -139,6 +146,21 @@ const AuthForm =  ({ type }: { type: "sign-in" | "sign-up" }) => {
        
           <div>
             <PlaidLink  user={user} variant="primary"/> 
+          </div>
+        ) : needsConfirmation ? (
+          <div className="flex flex-col gap-4">
+            <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+              <p className="text-sm text-blue-600">
+                A confirmation link has been sent to your email address. 
+                Once you've confirmed your email, you can sign in to connect your bank account.
+              </p>
+            </div>
+            <Link
+              href="/sign-in"
+              className="form-btn w-full text-center"
+            >
+              Go to Sign In
+            </Link>
           </div>
         ) : ( 
           <>

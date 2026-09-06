@@ -1,6 +1,7 @@
-import { StyledString } from 'next/dist/build/swc/types'
+"use client";
+
 import { Button } from './ui/button'
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { PlaidLinkOnSuccess, PlaidLinkOptions, usePlaidLink } from 'react-plaid-link'
 import { useRouter } from 'next/navigation'
 import { createLinkToken, exchangePublicToken } from '@/lib/actions/user.actions'
@@ -13,25 +14,27 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
   
   useEffect(() => {
     const getLinkToken = async () => {
-       // const data = await createLinkToken(user);
-
-       // setToken(data?.linkToken);
+       const data = await createLinkToken(user);
+       setToken(data?.linkToken);
     }
     getLinkToken();
 
-  }, []);
+  }, [user]);
 
 
 
   const onSuccess = useCallback<PlaidLinkOnSuccess>(async (public_token: string | null) => {
+    console.log('PlaidLink onSuccess called with token:', public_token ? 'token received' : 'no token');
     if (!public_token) return;
     
-     await exchangePublicToken({
+    console.log('Exchanging public token...');
+    await exchangePublicToken({
       publicToken: public_token,
       user,
     })
-     router.push('/');
-  }, [user])  
+    console.log('Exchange complete, redirecting to dashboard');
+    router.push('/');
+  }, [user, router])  
   const config: PlaidLinkOptions = {
     token,
     onSuccess

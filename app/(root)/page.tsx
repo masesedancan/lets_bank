@@ -3,8 +3,8 @@ import RightSidebar from '@/components/RightSidebar';
 import TotalBalanceBox from '@/components/TotalBalanceBox';
 import { getLoggedInUser } from '@/lib/actions/user.actions';
 import {  getAccount, getAccounts } from '@/lib/actions/bank.actions'
-import React from 'react'
 import RecentTransactions from '@/components/RecentTransactions';
+import PlaidLink from '@/components/PlaidLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +17,32 @@ const Home = async ( { searchParams }:SearchParamProps) =>{
     })
     if (!accounts) return;
     const accountsData = accounts?.data
+    
+    
+    // Safety net: if no bank accounts are linked, show connect prompt
+    if (!accountsData || accountsData.length === 0) {
+        return (
+            <section className="home">
+                <div className="home-content">
+                    <header className="home-header">
+                        <HeaderBox
+                          type="greeting"
+                          title="Welcome"
+                          user={loggedIn?.first_name || 'Guest'}
+                          subtext="Connect your bank account to get started."
+                        />
+                    </header>
+                    <div className="flex flex-col items-center justify-center gap-4 py-8">
+                        <p className="text-gray-600 text-center">
+                            You haven't connected any bank accounts yet. Click below to link your first account.
+                        </p>
+                        <PlaidLink user={loggedIn} variant="primary" />
+                    </div>
+                </div>
+            </section>
+        );
+    }
+    
     const appwriteItemId = (id as string) || accounts?.data[0]?.appwriteItemId;
     const account = await getAccount({ appwriteItemId })
    
@@ -27,7 +53,7 @@ const Home = async ( { searchParams }:SearchParamProps) =>{
                     <HeaderBox
                       type="greeting"
                       title="Welcome"
-                      user={loggedIn?.firstName || 'Guest'}
+                      user={loggedIn?.first_name || 'Guest'}
                       subtext="Access and manage your account and transactions efficiently."
                     />
                     <TotalBalanceBox

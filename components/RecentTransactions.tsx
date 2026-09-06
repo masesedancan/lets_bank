@@ -53,7 +53,9 @@ const RecentTransactions = ({
               appwriteItemId={appwriteItemId}
               type="full"
             />
-            <TransactionsTable transactions={currentTransactions} />
+            <div className="transactions-table-wrapper">
+              <TransactionsTable transactions={currentTransactions} />
+            </div>
            
             {totalPages > 1 && (
               <div className="my-4 w-full">

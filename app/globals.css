@@ -83,7 +83,7 @@
   }
 
   .home-content {
-    @apply no-scrollbar flex w-full flex-1 flex-col gap-8 px-5 sm:px-8 py-7 lg:py-12 xl:max-h-screen xl:overflow-y-scroll;
+    @apply no-scrollbar flex w-full flex-1 flex-col gap-8 px-5 sm:px-8 py-7 lg:py-12 xl:max-h-screen xl:overflow-y-scroll max-w-[1440px];
   }
 
   .home-header {
@@ -127,10 +127,6 @@
     @apply rounded-lg border border-gray-300 px-4 py-2.5 font-semibold text-gray-700;
   }
 
-  .recent-transactions {
-    @apply flex w-full flex-col gap-6;
-  }
-
   .recent-transactions-label {
     font-size: 20px;
     line-height: 28px;
@@ -146,6 +142,10 @@
 
   .recent-transactions-tablist {
     @apply custom-scrollbar mb-8 flex w-full flex-nowrap;
+  }
+
+  .transactions-table-wrapper {
+    @apply w-full overflow-x-auto;
   }
 
   /* Right sidebar */
@@ -244,7 +244,7 @@
   /* Bank Card */
   .bank-card {
     background: linear-gradient(90deg, #0179FE 0%, #4893FF 100%);
-    @apply relative flex h-[190px] w-full max-w-[320px] justify-between rounded-[20px] border border-white shadow-creditCard backdrop-blur-[6px];
+    @apply relative flex h-[190px] w-full max-w-[320px] justify-between rounded-[20px] border border-white shadow-creditCard backdrop-blur-[6px] overflow-hidden;
   }
 
   .bank-card_content {

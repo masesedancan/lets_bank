@@ -64,7 +64,7 @@ const BankCard = ({ account, userName, showBalance = true}: CreditCardProps) => 
             width={316}
             height={190}
             alt='lines'
-            className="absolute top-0 left-0" />
+            className="absolute top-0 left-0 pointer-events-none" />
         </Link>
 
         {showBalance && <Copy title={account?.sharableId} />}

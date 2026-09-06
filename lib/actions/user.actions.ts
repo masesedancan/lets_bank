@@ -22,10 +22,13 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
   try {
     const supabase = await createClient();
 
-    // create Supabase auth user — this also sets the session cookies
+    // create Supabase auth user with email redirect
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: userData.email,
       password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/sign-in`,
+      },
     });
 
     if (authError) {
@@ -44,6 +47,17 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
     }
 
     newUserId = authData.user.id;
+
+    // Check if email confirmation is required (session will be null)
+    const needsEmailConfirmation = !authData.session;
+
+    if (needsEmailConfirmation) {
+      // Don't create Dwolla customer or profile yet - wait for email confirmation
+      return { 
+        user: null, 
+        needsEmailConfirmation: true 
+      };
+    }
 
     // create dwolla customer - map fields to match Dwolla API expectations
     const dwollaCustomerUrl = await createDwollaCustomer({
@@ -88,7 +102,19 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
 
     if (profileError) throw profileError;
 
-    return parseStringify(newProfile);
+    // Map database fields (snake_case) to User type fields (camelCase)
+    const user = {
+      ...newProfile,
+      dwollaCustomerId: newProfile.dwolla_customer_id,
+      dwollaCustomerUrl: newProfile.dwolla_customer_url,
+      postalCode: newProfile.postal_code,
+      dateOfBirth: newProfile.date_of_birth,
+    };
+
+    return { 
+      user: parseStringify(user), 
+      needsEmailConfirmation: false 
+    };
   } catch (error) {
     console.error("Error", error);
 
@@ -99,7 +125,7 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
       await supabaseAdmin.auth.admin.deleteUser(newUserId);
     }
 
-    return null;
+    throw error;
   }
 };
 
@@ -184,7 +210,7 @@ export const createLinkToken = async (user: User) => {
         client_user_id: user.id, // was user.$id under Appwrite
       },
       client_name: user?.first_name + user?.last_name,
-      products: ["auth"] as Products[],
+      products: ["auth", "transactions"] as Products[],
       language: "en",
       country_codes: ["US"] as CountryCode[],
     };
@@ -270,7 +296,17 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
       .single();
 
     if (error) return null;
-    return parseStringify(data);
+    
+    // Map database fields (snake_case) to User type fields (camelCase)
+    const user = {
+      ...data,
+      dwollaCustomerId: data.dwolla_customer_id,
+      dwollaCustomerUrl: data.dwolla_customer_url,
+      postalCode: data.postal_code,
+      dateOfBirth: data.date_of_birth,
+    };
+    
+    return parseStringify(user);
   } catch (error) {
     console.error("Error", error);
     return null;
@@ -318,7 +354,19 @@ export const getBanks = async ({ userId }: getBanksProps) => {
       .eq("user_id", userId);
 
     if (error) throw error;
-    return parseStringify(data);
+    
+    // Map database fields (snake_case) to Bank type fields (camelCase)
+    const banks = data?.map((bank: any) => ({
+      ...bank,
+      accessToken: bank.access_token,
+      accountId: bank.account_id,
+      bankId: bank.bank_id,
+      fundingSourceUrl: bank.funding_source_url,
+      sharableId: bank.sharable_id,
+      userId: bank.user_id,
+    }));
+    
+    return parseStringify(banks);
   } catch (error) {
     console.error("Error", error);
     return null;
@@ -339,7 +387,21 @@ export const getBank = async ({ documentId }: getBankProps) => {
       .single();
 
     if (error) return null;
-    return parseStringify(data);
+    
+    // Map database fields (snake_case) to Bank type fields (camelCase)
+    const bank = {
+      ...data,
+      accessToken: data.access_token,
+      accountId: data.account_id,
+      bankId: data.bank_id,
+      fundingSourceUrl: data.funding_source_url,
+      sharableId: data.sharable_id,
+      userId: data.user_id,
+      // Add $id for backward compatibility
+      $id: data.id,
+    };
+    
+    return parseStringify(bank);
   } catch (error) {
     console.error("Error", error);
     return null;
@@ -363,7 +425,22 @@ export const getBankByAccountId = async ({
       .single();
 
     if (error) return null;
-    return parseStringify(data);
+    
+    // Map snake_case fields to camelCase
+    const mappedBank = data ? {
+      id: data.id,
+      userId: data.user_id,
+      accountId: data.account_id,
+      bankId: data.bank_id,
+      accessToken: data.access_token,
+      fundingSourceUrl: data.funding_source_url,
+      sharableId: data.sharable_id,
+      createdAt: data.created_at,
+      // Keep original field names for backward compatibility
+      $id: data.id,
+    } : null;
+    
+    return parseStringify(mappedBank);
   } catch (error) {
     console.error("Error", error);
     return null;

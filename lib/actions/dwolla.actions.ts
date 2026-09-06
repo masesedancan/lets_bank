@@ -35,8 +35,18 @@ export const createFundingSource = async (
         plaidToken: options.plaidToken,
       })
       .then((res) => res.headers.get("location"));
-  } catch (err) {
+  } catch (err: any) {
     console.error("Creating a Funding Source Failed: ", err);
+    console.error("Dwolla Customer ID:", options.customerId);
+    console.error("Bank Name:", options.fundingSourceName);
+    
+    // Handle duplicate funding source - extract existing funding source URL from error
+    if (err.body && err.body.code === 'DuplicateResource' && err.body._links && err.body._links.about) {
+      console.log("Funding source already exists, using existing URL:", err.body._links.about.href);
+      return err.body._links.about.href;
+    }
+    
+    throw err;
   }
 };
 
@@ -59,8 +69,21 @@ export const createDwollaCustomer = async (
     return await dwollaClient
       .post("customers", newCustomer)
       .then((res) => res.headers.get("location"));
-  } catch (err) {
+  } catch (err: any) {
     console.error("Creating a Dwolla Customer Failed: ", err);
+    console.error("Customer data:", JSON.stringify(newCustomer, null, 2));
+    
+    // Handle duplicate customer - extract existing customer URL from error
+    if (err.body && err.body._embedded && err.body._embedded.errors) {
+      console.error("Dwolla validation errors:", JSON.stringify(err.body._embedded.errors, null, 2));
+      
+      const duplicateError = err.body._embedded.errors.find((e: any) => e.code === 'Duplicate');
+      if (duplicateError && duplicateError._links && duplicateError._links.about) {
+        console.log("Customer already exists, using existing customer URL:", duplicateError._links.about.href);
+        return duplicateError._links.about.href;
+      }
+    }
+    throw err;
   }
 };
 
