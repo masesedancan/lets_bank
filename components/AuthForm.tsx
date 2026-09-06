@@ -61,7 +61,7 @@ const AuthForm =  ({ type }: { type: "sign-in" | "sign-up" }) => {
       //  Sign up with Supabase & create Dwolla customer
 
       if(type === 'sign-up'){
-        const newUser = await signUp(data);
+        const newUser = await signUp(data as SignUpParams);
 
         if (!newUser) {
           throw new Error('Sign up failed. Please try again.');

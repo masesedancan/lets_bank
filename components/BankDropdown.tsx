@@ -42,7 +42,7 @@ export const BankDropdown = ({
   return (
     <Select
       defaultValue={selected.id}
-      onValueChange={(value) => handleBankChange(value)}
+      onValueChange={(value) => value && handleBankChange(value)}
     >
       <SelectTrigger
         className={`flex w-full bg-white gap-3 md:w-[300px] ${otherStyles}`}
