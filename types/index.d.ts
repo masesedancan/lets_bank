@@ -59,7 +59,7 @@ declare type Account = {
   type: string;
   subtype: string;
   appwriteItemId: string;
-  sharaebleId: string;
+  sharableId: string;
 };
 
 declare type Transaction = {
@@ -75,6 +75,7 @@ declare type Transaction = {
   date: string;
   image: string;
   $createdAt: string;
+  createdAt: string;
   channel: string;
   senderBankId: string;
   receiverBankId: string;
@@ -82,12 +83,14 @@ declare type Transaction = {
 
 declare type Bank = {
   $id: string;
+  id: string;
   accountId: string;
   bankId: string;
   accessToken: string;
   fundingSourceUrl: string;
   userId: string;
-  sharaebleId: string;
+  sharableId: string;
+  sharable_id: string;
 };
 
 declare type AccountTypes =

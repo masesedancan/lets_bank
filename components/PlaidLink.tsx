@@ -23,7 +23,7 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
 
 
 
-  const onSucess = useCallback<PlaidLinkOnSuccess>(async (public_token: string) => {
+  const onSuccess = useCallback<PlaidLinkOnSuccess>(async (public_token: string) => {
      await exchangePublicToken({
       publicToken: public_token,
       user,
@@ -32,7 +32,7 @@ const PlaidLink = ({ user, variant }: PlaidLinkProps) => {
   }, [user])  
   const config: PlaidLinkOptions = {
     token,
-    onSucess
+    onSuccess
   }
 
   const { open, ready } = usePlaidLink(config);
