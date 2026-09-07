@@ -31,7 +31,7 @@ const RecentTransactions = ({
         </Link>
       </header>
       <Tabs defaultValue={appwriteItemId} className="w-full">
-      <TabsList className="recent-transactions-tablist">
+      <TabsList className="recent-transactions-tablist !flex !w-full">
           {accounts.map((account: Account) => (
             <TabsTrigger key={account.id} value={account.appwriteItemId}>
               <BankTabItem

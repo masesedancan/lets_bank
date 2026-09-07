@@ -87,14 +87,14 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     });
 
     const transferTransactions = transferTransactionsData.documents.map(
-      (transferData: Transaction) => ({
+      (transferData: any) => ({
         id: transferData.id,
         name: transferData.name!,
         amount: transferData.amount!,
-        date: transferData.createdAt,
+        date: transferData.created_at,
         paymentChannel: transferData.channel,
         category: transferData.category,
-        type: transferData.senderBankId === bank.$id ? "debit" : "credit",
+        type: transferData.sender_bank_id === bank.id ? "debit" : "credit",
       })
     );
 
